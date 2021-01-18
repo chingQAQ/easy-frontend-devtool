@@ -1,0 +1,31 @@
+# user settings
+*.user
+.vs
+.vscode
+# patch
+patch
+
+# frontend
+**/dist
+**/node_modules
+**/source-map
+**/style.css
+**/style-source.css
+**/*.min.js
+**/*.orig
+**/log.txt
+*.map
+.changelog
+
+# .net
+*.vshost.*
+**/obj
+**/packages
+**/bin
+
+# other
+**/upload
+
+#custom
+Backend/CustomPage/File/
+www/dummy_preview.aspx
