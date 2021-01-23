@@ -1,0 +1,16 @@
+$color-primary: blue;
+
+.d-flex {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-flow: row wrap;
+
+  &-demo {
+    display: grid;
+  }
+}
+
+.text-primary {
+  color: $color-primary;
+}
