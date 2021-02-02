@@ -5,7 +5,9 @@
   "main": "gulpfile.js",
   "scripts": {
     "watch:js": "gulp watch:js",
-    "min:css": "gulp min:css"
+    "min:css": "gulp min:css",
+    "watch:images": "gulp watch:images",
+    "min:images": "gulp min:images"
   },
   "keywords": [],
   "author": "",
@@ -28,11 +30,16 @@
     "gulp-stylelint": "^13.0.0",
     "gulp-uglify": "^3.0.2",
     "gulp-webserver": "^0.9.1",
+    "imagemin": "^7.0.1",
+    "imagemin-pngquant": "^9.0.1",
     "lazypipe": "^1.0.2",
     "node-sass": "^5.0.0",
+    "postcss-sprites": "^4.2.1",
+    "postcss-svg-sprite": "^1.0.6",
     "stylelint": "^13.9.0"
   },
   "dependencies": {
+    "imagemin-jpeg-recompress": "^7.0.0",
     "through": "^2.3.8"
   },
   "browserslist": [
