@@ -4,7 +4,7 @@
   "description": "",
   "main": "gulpfile.js",
   "scripts": {
-    "watch:js": "gulp watch:js",
+    "min:js": "gulp min:js",
     "min:css": "gulp min:css",
     "watch:images": "gulp watch:images",
     "min:images": "gulp min:images"
@@ -18,6 +18,7 @@
     "autoprefixer": "^9.0.0",
     "babel-preset-minify": "^0.5.1",
     "del": "^5.1.0",
+    "dotenv": "^8.2.0",
     "gulp": "^4.0.2",
     "gulp-babel": "^8.0.0",
     "gulp-cached": "^1.1.1",

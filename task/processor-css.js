@@ -50,7 +50,7 @@ const processors = [
   sprites(opts),
 ]
 
-function compilerSass() {
+function cssCompiler() {
   return src(SASS_FILE)
     .pipe(cached('css'))
     .pipe(renameFile())
@@ -75,4 +75,4 @@ function compilerSass() {
     .pipe(dest('./dist/css'))
 }
 
-module.exports = compilerSass;
+module.exports = cssCompiler;
