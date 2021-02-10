@@ -1,13 +1,15 @@
 ﻿
 const { existsSync } = require('fs');
-const { join, posix } = require('path');
+const { join, posix, sep, resolve } = require('path');
 
 function validPath(path) {
-  const matchSlash = path.match('/');
-  if (matchSlash === null || matchSlash.index <= 0) {
-    return null;
+  const parse = path.split(posix.sep);
+  const result = parse.filter(i => i !== null).join('/');
+  if (result.length) return resolve(result);
+  else {
+    console.error('路徑驗證錯誤，terminal關閉', result);
+    process.exit();
   }
-  return path;
 }
 
 function hasPath(path) {
