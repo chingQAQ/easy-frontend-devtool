@@ -34,14 +34,14 @@ const create = {
   },
   config: async () => {
     const exist = hasPath(configFile);
+    const content = JSON.stringify(config, null, 2);
     if (exist) {
       console.log('.config 已存在');
     } else {
       console.log('.config 不存在，建立中...');
-      const content = JSON.stringify(config, null, 2);
-      fs.writeFileSync(configFile, content);
-      console.log('.config 已建立');
     }
+    fs.writeFileSync(configFile, content);
+    console.log('.config 已建立');
   },
 }
 

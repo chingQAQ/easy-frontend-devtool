@@ -1,13 +1,19 @@
 {
-  "name": "gulp-test",
+  "name": "easy-frontend-devtool",
   "version": "1.0.0",
   "description": "",
   "main": "gulpfile.js",
   "scripts": {
+    "easy_install": "npm i && npm run easy_init",
+    "easy_init": "node task/init.js",
     "min:js": "gulp min:js",
     "min:css": "gulp min:css",
+    "min:images": "gulp min:images",
+    "watch:js": "gulp watch:js",
+    "watch:css": "gulp watch:css",
     "watch:images": "gulp watch:images",
-    "min:images": "gulp min:images"
+    "watch": "concurrently \"npm:watch:*\"",
+    "dev": "concurrently \"npm:watch \""
   },
   "keywords": [],
   "author": "",
@@ -17,6 +23,7 @@
     "@babel/preset-env": "^7.10.4",
     "autoprefixer": "^9.0.0",
     "babel-preset-minify": "^0.5.1",
+    "concurrently": "^5.3.0",
     "del": "^5.1.0",
     "dotenv": "^8.2.0",
     "gulp": "^4.0.2",
@@ -34,7 +41,6 @@
     "imagemin": "^7.0.1",
     "imagemin-pngquant": "^9.0.1",
     "lazypipe": "^1.0.2",
-    "node-abort-controller": "^1.1.0",
     "node-sass": "^5.0.0",
     "postcss-sprites": "^4.2.1",
     "postcss-svg-sprite": "^1.0.6",

@@ -3,18 +3,25 @@ const cached = require('gulp-cached');
 const sass = require('gulp-sass');
 const postcss = require('gulp-postcss');
 const autoprefixer = require('autoprefixer');
-const renameFile = require('./rename');
+const renameFile = require('../rename');
 const sprites = require('postcss-sprites');
-const path = require('path');
-const through = require('through');
+const { posix, join, resolve, relative, parse } = require('path');
 const fs = require('fs');
+const through = require('through');
+const configFile = resolve(__dirname, '..', '.config');
+const config = fs.readFileSync(configFile, 'utf8');
+const path = {
+  dev: JSON.parse(config).dev,
+  source: JSON.parse(config).source,
+  cssSource: JSON.parse(config).source + '/css',
+  imageSource: JSON.parse(config).source + '/images',
+};
 const spriteGroups = [];
 const opts = {
-  stylesheetPath: './src/sass/**/*.scss',
-  spritePath: './src/images',
+  stylesheetPath: path.dev + '/sass/**/*.scss',
+  spritePath: path.dev + '/images',
   groupBy: (image) => {
     const spriteGroup = image.url.split('_')[1].toString().slice(0, -4);
-    debugger;
     if (image.url.indexOf(spriteGroup) >= 0) {
       console.log(`找到了 ${spriteGroup}`)
       return Promise.resolve(spriteGroup);
@@ -23,7 +30,6 @@ const opts = {
     }
   },
   filterBy: (image) => {
-    debugger;
     if (!/sprite/.test(image.url)) {
       return Promise.reject();
     }
@@ -31,24 +37,45 @@ const opts = {
   },
   hooks: {
     onSaveSpritesheet: (opts, spritesheet) => {
-      debugger;
       spriteGroups.push(
-        path.posix.join(opts.spritePath, spritesheet.groups[0] + '.' + spritesheet.extension)
+        posix.join(opts.spritePath, spritesheet.groups[0] + '.' + spritesheet.extension)
       )
       const fileName = spritesheet.groups.concat(spritesheet.extension).join('.');
-      return path.join(opts.spritePath, fileName);
+      return join(opts.spritePath, fileName);
     },
+    onUpdateRule: function (rule, token, image) {
+      const imageBase = parse(image.spriteUrl).base
+      const imageUrl = join(relative(path.cssSource, path.imageSource), imageBase);
+      const backgroundImage = {
+        type: 'decl',
+        prop: 'background-image',
+        value: 'url(' + imageUrl + ')'
+      };
+      token.cloneAfter(backgroundImage);
+    }
   },
   verbose: true,
 }
-
-sass.compiler = require('node-sass');
-const SASS_FILE = ['src/sass/style-edit.scss'];
-
+const SASS_FILE = [path.dev + '/sass/style-edit.scss'];
 const processors = [
   autoprefixer(),
   sprites(opts),
 ]
+
+sass.compiler = require('node-sass');
+
+function writeImagePath() {
+  return through(function write(chunk) {
+    const devBase = parse(path.dev).base;
+    const sourceBase = parse(path.source).base;
+    if (spriteGroups.length > 0) {
+      spriteGroups.forEach(item => {
+        fs.createReadStream(item)
+          .pipe(fs.createWriteStream(item.replace(devBase, sourceBase)))
+      })
+    }
+  })
+}
 
 function cssCompiler() {
   return src(SASS_FILE)
@@ -56,23 +83,16 @@ function cssCompiler() {
     .pipe(renameFile())
     .pipe(sass({ outputStyle: 'expanded' }).on('error', sass.logError))
     .pipe(postcss(processors))
-    .pipe(
-      through(
-        function write(data) {
-          if (spriteGroups.length > 0) {
-            spriteGroups.forEach(item => {
-              fs.createReadStream(item)
-                .pipe(fs.createWriteStream(item.replace('src', 'dist')))
-            })
-          }
-          this.queue(data);
-        },
-        function end() {
-          this.queue(null);          
-        }
-      )
-    )
-    .pipe(dest('./dist/css'))
+    .pipe(writeImagePath())
+    .pipe(dest(path.cssSource));
 }
 
-module.exports = cssCompiler;
+function watchCss() {
+  watch(path.dev + '/sass/**/*.scss', cssCompiler);
+}
+
+module.exports = {
+  cssCompiler, 
+  watchCss,
+  path
+};

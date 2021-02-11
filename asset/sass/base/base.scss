@@ -1,0 +1,47 @@
+$color-primary: blue;
+
+.d-flex {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-flow: row wrap;
+
+  &-demo {
+    display: none;
+  }
+
+  &-buddha {
+    display: grid;
+    background-image: url('../../asset/images/sprite/buddha-sprite_test.png');
+    @media screen and (min-resolution: 2dppx) {
+      background-image: url('../../asset/images/sprite/buddha-sprite_test@2x.png');
+    }
+    @media screen and (min-resolution: 3dppx) {
+      background-image: url('../../asset/images/sprite/buddha-sprite_test@3x.png');
+    }
+  }
+
+  &-border {
+    background-image: url('../../asset/images/sprite/base-sprite_bg.png');
+    @media screen and (min-resolution: 2dppx) {
+      background-image: url('../../asset/images/sprite/base-sprite_bg@2x.png');
+    }
+    @media screen and (min-resolution: 3dppx) {
+      background-image: url('../../asset/images/sprite/base-sprite_bg@3x.png');
+    }
+  }
+
+  &-door {
+    background-image: url('../../asset/images/sprite/border-sprite_bg.png');
+    @media screen and (min-resolution: 2dppx) {
+      background-image: url('../../asset/images/sprite/border-sprite_bg@2x.png');
+    }
+    @media screen and (min-resolution: 3dppx) {
+      background-image: url('../../asset/images/sprite/border-sprite_bg@3x.png');
+    }
+  }
+}
+
+.text-primary {
+  color: $color-primary;
+}
