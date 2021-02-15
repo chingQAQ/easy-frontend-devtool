@@ -15,7 +15,7 @@ patch
 **/*.orig
 **/log.txt
 *.map
-.changelog
+**/.config
 
 # .net
 *.vshost.*
