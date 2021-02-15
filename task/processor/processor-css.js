@@ -95,7 +95,7 @@ const stream = {
   }),
   writeImagePath: () => through(function write(chunk) {
     const devBase = parse(PATH.dev).base;
-    const sourceBase = parse(PATH.source).base;
+    const sourceBase = PATH.source.split(process.cwd())[1];
     const isExist = hasPath(PATH.imageSource);
     if (!isExist) fs.mkdirSync(PATH.imageSource);
     if (spriteGroups.length > 0) {
