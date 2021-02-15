@@ -1,19 +1,20 @@
+const PATH = require('./config');
 const { watch } = require('gulp');
-const { path } = require('./processor-css');
 const imagemin = require('imagemin');
 const imageminJpegRecompress = require('imagemin-jpeg-recompress');
 const imageminPngquant = require('imagemin-pngquant');
 
-const MUST_EXCLUDE = [ path.dev + '/images/*.{jpg,png}'];
-const SOURCES_FILE = [ path.imageSource + '/*.{jpg,png}'];
+const destination = PATH.imageSource
+const watchFiles = [ PATH.dev + '/images/*.{jpg,png}'];
+const compressFiles = [destination + '/*.{jpg,png}'];
 
 async function watchImg() {
-  watch(MUST_EXCLUDE, imageOptimize);
+  watch(watchFiles, imageOptimize);
 }
 
 async function imageOptimize () {
-  const files = await imagemin(SOURCES_FILE, {
-    destination: path.imageSource,
+  const files = await imagemin(compressFiles, {
+    destination,
     plugins: [
       imageminJpegRecompress({
         quality: 'veryhigh',
@@ -23,7 +24,7 @@ async function imageOptimize () {
       }),
     ]
   });
-  console.log(`壓縮了 ${files.length}張 圖片`);
+  console.log(`壓縮了 ${files.length} 張圖片`);
 }
 
 module.exports = { imageOptimize, watchImg };

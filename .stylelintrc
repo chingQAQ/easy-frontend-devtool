@@ -1,0 +1,50 @@
+﻿{
+  "extends": [
+    "stylelint-config-sass-guidelines",
+    "stylelint-config-rational-order"
+  ],
+  "plugins": [
+    "stylelint-order",
+    "stylelint-config-rational-order/plugin"
+  ],
+  "rules": {
+    "order/properties-alphabetical-order": null,
+    "order/order": [
+      "custom-properties",
+      "dollar-variables",
+      "declarations",
+      "rules"
+    ],
+    "order/properties-order": [],
+    "plugin/rational-order": [
+      true,
+      {
+        "border-in-box-model": false,
+        "empty-line-between-groups": false
+      }
+    ],
+    "max-nesting-depth": [
+      2,
+      {
+        "ignoreAtRules": [
+          "each",
+          "media",
+          "supports",
+          "include",
+          "at-root"
+        ]
+      } 
+    ],
+  },
+  "ignoreFiles": [
+    "**/editor.*",
+    "**/reset.scss",
+    "**/base.scss",
+    "**/style-*.scss",
+    "**/style-*.css",
+    "**/style.css",
+    "**/*.min.*",
+    "**/backend/sass/*.scss",
+    "**/*.js"
+  ]
+}

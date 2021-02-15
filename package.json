@@ -12,24 +12,27 @@
     "watch:js": "gulp watch:js",
     "watch:css": "gulp watch:css",
     "watch:images": "gulp watch:images",
-    "watch": "concurrently \"npm:watch:*\"",
-    "dev": "concurrently \"npm:watch \""
+    "dev": "concurrently \"npm:watch:css \" npm:watch:images \"",
+    "build": "cross-env NODE_ENV=production concurrently \"npm:min:* \""
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@babel/core": "^7.10.4",
-    "@babel/preset-env": "^7.10.4",
+    "@babel/core": "^7.12.16",
+    "@babel/preset-env": "^7.12.16",
     "autoprefixer": "^9.0.0",
-    "babel-preset-minify": "^0.5.1",
+    "babel-core": "^7.0.0-bridge.0",
     "concurrently": "^5.3.0",
+    "cssnano-preset-advanced": "^4.0.7",
     "del": "^5.1.0",
-    "dotenv": "^8.2.0",
     "gulp": "^4.0.2",
     "gulp-babel": "^8.0.0",
+    "gulp-babel-minify": "^0.5.1",
     "gulp-cached": "^1.1.1",
     "gulp-concat": "^2.6.1",
+    "gulp-cssnano": "^2.1.3",
+    "gulp-if": "^3.0.0",
     "gulp-minify-css": "^1.2.4",
     "gulp-postcss": "^9.0.0",
     "gulp-rename": "^2.0.0",
@@ -37,20 +40,24 @@
     "gulp-sourcemaps": "^3.0.0",
     "gulp-stylelint": "^13.0.0",
     "gulp-uglify": "^3.0.2",
+    "gulp-uglify-es": "^2.0.0",
     "gulp-webserver": "^0.9.1",
     "imagemin": "^7.0.1",
+    "imagemin-jpeg-recompress": "^7.0.0",
     "imagemin-pngquant": "^9.0.1",
     "lazypipe": "^1.0.2",
     "node-sass": "^5.0.0",
     "postcss-sprites": "^4.2.1",
     "postcss-svg-sprite": "^1.0.6",
-    "stylelint": "^13.9.0"
-  },
-  "dependencies": {
-    "imagemin-jpeg-recompress": "^7.0.0",
+    "stylelint": "^13.10.0",
+    "stylelint-config-rational-order": "^0.1.2",
+    "stylelint-config-sass-guidelines": "^8.0.0",
+    "stylelint-config-standard": "^20.0.0",
+    "stylelint-order": "^4.1.0",
     "through": "^2.3.8"
   },
   "browserslist": [
     "last 2 version"
-  ]
+  ],
+  "dependencies": {}
 }

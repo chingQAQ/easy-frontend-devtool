@@ -1,29 +1,30 @@
+const fs = require('fs');
+const { posix, join, relative, parse } = require('path');
 const { src, dest, watch } = require('gulp');
-const cached = require('gulp-cached');
+const gulpif = require('gulp-if');
 const sass = require('gulp-sass');
 const postcss = require('gulp-postcss');
-const autoprefixer = require('autoprefixer');
-const renameFile = require('../rename');
+const rename = require('gulp-rename');
+const cssnano = require('gulp-cssnano');
+const sourcemaps = require('gulp-sourcemaps');
 const sprites = require('postcss-sprites');
-const { posix, join, resolve, relative, parse } = require('path');
-const fs = require('fs');
+const stylelint = require('stylelint');
+const autoprefixer = require('autoprefixer');
 const through = require('through');
-const configFile = resolve(__dirname, '..', '.config');
-const config = fs.readFileSync(configFile, 'utf8');
-const path = {
-  dev: JSON.parse(config).dev,
-  source: JSON.parse(config).source,
-  cssSource: JSON.parse(config).source + '/css',
-  imageSource: JSON.parse(config).source + '/images',
-};
+const { hasPath } = require('../util');
+const isProduction = process.env.NODE_ENV === 'production';
+const PATH = require('./config');
+const option = { removeBOM: false, allowEmpty: true };
+const sourceMapPath = '../source-map/css';
+
 const spriteGroups = [];
-const opts = {
-  stylesheetPath: path.dev + '/sass/**/*.scss',
-  spritePath: path.dev + '/images',
+const spriteSettings = {
+  stylesheetPath: PATH.dev + '/sass/**/*.scss',
+  spritePath: PATH.dev + '/images',
   groupBy: (image) => {
     const spriteGroup = image.url.split('_')[1].toString().slice(0, -4);
     if (image.url.indexOf(spriteGroup) >= 0) {
-      console.log(`找到了 ${spriteGroup}`)
+      console.log(`[sprite] group ${spriteGroup}`)
       return Promise.resolve(spriteGroup);
     } else {
       return Promise.reject();
@@ -45,54 +46,102 @@ const opts = {
     },
     onUpdateRule: function (rule, token, image) {
       const imageBase = parse(image.spriteUrl).base
-      const imageUrl = join(relative(path.cssSource, path.imageSource), imageBase);
-      const backgroundImage = {
+      const imageUrl = join(relative(PATH.cssSource, PATH.imageSource), imageBase);
+      const checkNaN = number => isNaN(number) ? 0 : number;
+      const backgroundSize = {
+        width: checkNaN((image.spriteWidth / image.coords.width) * 100),
+        height: checkNaN((image.spriteHeight / image.coords.height) * 100),
+      }
+      const backgroundPosition = {
+        x: checkNaN((image.coords.x / (image.spriteWidth - image.coords.width)) * 100),
+        y: checkNaN((image.coords.y / (image.spriteHeight - image.coords.height)) * 100),
+      }
+      const setBackgroundImage = {
         type: 'decl',
         prop: 'background-image',
         value: 'url(' + imageUrl + ')'
       };
-      token.cloneAfter(backgroundImage);
+      const setBackgroundSize = {
+        type: 'decl',
+        prop: 'background-size',
+        value: `${backgroundSize.width}% ${backgroundSize.height}%`
+      };
+      const setBackgroundPosition = {
+        type: 'decl',
+        prop: 'background-position',
+        value: `${backgroundPosition.x}% ${backgroundPosition.y}%`
+      };
+
+      token
+        .cloneAfter(setBackgroundImage)
+        .cloneAfter(setBackgroundSize)
+        .cloneAfter(setBackgroundPosition);
     }
   },
   verbose: true,
 }
-const SASS_FILE = [path.dev + '/sass/style-edit.scss'];
+const sassFiles = [PATH.dev + '/sass/style-edit.scss'];
 const processors = [
   autoprefixer(),
-  sprites(opts),
+  sprites(spriteSettings),
 ]
 
 sass.compiler = require('node-sass');
 
-function writeImagePath() {
-  return through(function write(chunk) {
-    const devBase = parse(path.dev).base;
-    const sourceBase = parse(path.source).base;
+const stream = {
+  rename: () => rename(path => {
+    path.basename = 'style';
+    if (isProduction) path.basename += '.min';
+  }),
+  writeImagePath: () => through(function write(chunk) {
+    const devBase = parse(PATH.dev).base;
+    const sourceBase = parse(PATH.source).base;
+    const isExist = hasPath(PATH.imageSource);
+    if (!isExist) fs.mkdirSync(PATH.imageSource);
     if (spriteGroups.length > 0) {
       spriteGroups.forEach(item => {
         fs.createReadStream(item)
           .pipe(fs.createWriteStream(item.replace(devBase, sourceBase)))
       })
     }
+    this.queue(chunk);
+  }),
+  lint: () => through(async function write(chunk) {
+    this.pause();
+    const data = await stylelint.lint({
+      files: PATH.dev + '/sass/**/*.scss',
+      formatter: "verbose"
+    })
+    if (data.errored === true) {
+      console.log('[stylelint] 發現錯誤' + data.output)
+      process.exit();
+    }
+    console.log('[stylelint] 驗證完成')
+    this
+      .resume()
+      .emit('data', chunk);
   })
 }
 
 function cssCompiler() {
-  return src(SASS_FILE)
-    .pipe(cached('css'))
-    .pipe(renameFile())
-    .pipe(sass({ outputStyle: 'expanded' }).on('error', sass.logError))
+  return src(sassFiles, Object.assign({}, option))
+    .pipe(stream.lint())
+    .pipe(stream.rename())
+    .pipe(sourcemaps.init())
+    .pipe(sass({outputStyle: 'expanded'}).on('error', sass.logError))
     .pipe(postcss(processors))
-    .pipe(writeImagePath())
-    .pipe(dest(path.cssSource));
+    .pipe(stream.writeImagePath())
+    .pipe(gulpif(isProduction, cssnano({preset: ['advanced']})))
+    .pipe(sourcemaps.write(sourceMapPath))
+    .pipe(dest(PATH.cssSource));
 }
 
 function watchCss() {
-  watch(path.dev + '/sass/**/*.scss', cssCompiler);
+  console.log('[watch css] sass files listening...')
+  watch(PATH.dev + '/sass', cssCompiler);
 }
 
 module.exports = {
   cssCompiler, 
   watchCss,
-  path
 };

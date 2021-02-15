@@ -1,44 +1,43 @@
 const { src, dest, watch } = require('gulp');
-const babel = require('gulp-babel');
-const lazypipe = require('lazypipe');
-const cached = require('gulp-cached');
 const sourcemaps = require('gulp-sourcemaps');
-const renameFile = require('../rename');
-const { resolve } = require('path');
-const fs = require('fs');
-const configFile = resolve(__dirname, '..', '.config');
-const config = fs.readFileSync(configFile, 'utf8');
-const path = {
-  dev: JSON.parse(config).dev,
-  source: JSON.parse(config).source
+const cached = require('gulp-cached');
+const babel = require('gulp-babel');
+const gulpif = require('gulp-if');
+const rename = require('gulp-rename');
+const minify = require("gulp-babel-minify");
+const isProduction = process.env.NODE_ENV === 'production';
+const PATH = require('./config');
+const exportsFile = [PATH.dev + '/js/**/*.js'];
+const option = { base: PATH.dev, removeBOM: false, allowEmpty: true };
+const minifyOption = {
+  removeConsole: true,
+  removeDebugger: true
 };
+const bebelOption = {
+  presets: ['@babel/preset-env'],
+  comments: false,
+  shouldPrintComment: val => /(^!|@preserve|@license|@cc_on)/i.test(val),
+};
+const sourceMapPath = 'source-map/';
 
-const EXPORTS_FILE = [path.dev + '/js/**/*.js'];
-const OPTION = { base: path.dev, removeBOM: false, allowEmpty: true };
-
-const optimizeJs = (option = {}) => lazypipe()
-  .pipe(sourcemaps.init)
-  .pipe(babel, {
-    presets: ['@babel/preset-env', 'minify'],
-    comments: false,
-    shouldPrintComment: val => /(^!|@preserve|@license|@cc_on)/i.test(val),
-  })
-  .pipe(sourcemaps.write, 'source-map/')
-  ()
+const stream = {
+  rename: () => rename(path => isProduction ? path.basename += '.min' : ''),
+}
 
 function minJs() {
-  return src(EXPORTS_FILE, Object.assign({}, OPTION))
+  return src(exportsFile, Object.assign({}, option))
     .pipe(cached('js'))
-    .pipe(renameFile())
-    .pipe(optimizeJs())
-    .on('error', err => {
-      console.log(err)
-    })
-    .pipe(dest(path.source))
+    .pipe(stream.rename())
+    .pipe(sourcemaps.init())
+    .pipe(babel(bebelOption))
+    .pipe(gulpif(isProduction, minify(minifyOption)))
+    .pipe(sourcemaps.write(sourceMapPath))
+    .pipe(dest(PATH.source))
 }
 
 function watchJs() {
-  watch(EXPORTS_FILE, minJs);
+  console.log('[watch Js] Js files listening...')
+  watch(exportsFile, minJs);
 }
 
 module.exports = {

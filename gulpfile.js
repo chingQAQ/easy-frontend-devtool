@@ -3,7 +3,6 @@
   css: { cssCompiler, watchCss },
   images: { imageOptimize, watchImg }
 } = require('./task/processor');
-debugger;
 
 module.exports = Object.assign({},
   {
