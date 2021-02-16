@@ -1,4 +1,8 @@
-﻿.demo {
+﻿* {
+  font-size: 32px;
+}
+
+.demo {
   position: relative;
   display: block;
   @include bg('../../asset/images/sprite/', 'base-sprite_bg', 'png');
