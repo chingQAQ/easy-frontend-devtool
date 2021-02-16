@@ -1,0 +1,10 @@
+﻿.demo {
+  position: relative;
+  display: block;
+  @include bg('../../asset/images/sprite/', 'base-sprite_bg', 'png');
+
+  &-demooooo {
+    position: absolute;
+    @include bg('../../asset/images/sprite/', 'border-sprite_bg', 'png');
+  }
+}

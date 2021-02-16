@@ -12,8 +12,8 @@
     "watch:js": "gulp watch:js",
     "watch:css": "gulp watch:css",
     "watch:images": "gulp watch:images",
-    "dev": "concurrently \"npm:watch:css \" npm:watch:images \"",
-    "build": "cross-env NODE_ENV=production concurrently \"npm:min:* \""
+    "dev": "gulp dev",
+    "build": "cross-env NODE_ENV=production gulp build"
   },
   "keywords": [],
   "author": "",
