@@ -4,7 +4,7 @@ const PATH = require('./config');
 const viewPath = PATH.source.split(process.cwd())[1];
 const option = { removeBOM: false, allowEmpty: true };
 const serveStatic = require('serve-static');
-const { createProxyMiddleware } = require('http-proxy-middleware');
+// const { createProxyMiddleware } = require('http-proxy-middleware');
 const { root: proxyRoot, option: proxyOptions } = {
   root: '/api',
   option: {
@@ -20,7 +20,7 @@ const { root: proxyRoot, option: proxyOptions } = {
 };
 const middleware = {
   static: serveStatic(PATH.source),
-  proxy: createProxyMiddleware(proxyRoot, proxyOptions) // proxy想不到要用在哪先放上來
+  // proxy: createProxyMiddleware(proxyRoot, proxyOptions) // proxy想不到要用在哪先放上來
 };
 
 const stream = {

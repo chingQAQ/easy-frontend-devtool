@@ -2,6 +2,22 @@
   font-size: 32px;
 }
 
+.foo {
+  color: #f00;
+  
+  @media screen and (min-width: 1024px) {
+    &-foo { color: #008000; }
+  }
+}
+
+.bar {
+  font-size: 1rem;
+
+  @media screen and (min-width: 1024px) {
+    &-bar { font-size: 2rem; }
+  }
+}
+
 .demo {
   position: relative;
   display: block;

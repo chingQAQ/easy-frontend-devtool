@@ -84,7 +84,7 @@ const sassFiles = [PATH.dev + '/sass/style-edit.scss'];
 const processors = [
   autoprefixer(),
   sprites(spriteSettings),
-]
+];
 
 sass.compiler = require('node-sass');
 
@@ -120,7 +120,7 @@ const stream = {
     this
       .resume()
       .emit('data', chunk);
-  })
+  }),
 }
 
 function cssCompiler() {
