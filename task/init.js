@@ -1,7 +1,6 @@
 ﻿const fs = require('fs');
 const { join, posix, resolve, parse } = require('path');
 const readline = require('readline');
-const { platform } = require('os');
 const { validPath, hasPath } = require('./util');
 const configFile = resolve(__dirname, '.config');
 

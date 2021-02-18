@@ -1,13 +1,18 @@
 const PATH = require('./config');
+const { join } = require('path');
 const { watch } = require('gulp');
 const imagemin = require('imagemin');
 const imageminJpegRecompress = require('imagemin-jpeg-recompress');
 const imageminPngquant = require('imagemin-pngquant');
+const { transformToGlobPath } = require('../util');
 
-const destination = PATH.imageSource
-const watchFiles = [ PATH.dev + '/images/*.{jpg,png}'];
-const compressFiles = [destination + '/*.{jpg,png}'];
-
+const destination = PATH.imageSource;
+const watchFiles = [
+  transformToGlobPath(join(PATH.dev, 'images', '*.{jpg,png}'))
+];
+const compressFiles = [
+  transformToGlobPath(join(destination, '/*.{jpg,png}'))
+];
 async function watchImg() {
   watch(watchFiles, imageOptimize);
 }

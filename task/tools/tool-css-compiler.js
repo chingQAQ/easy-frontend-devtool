@@ -1,5 +1,5 @@
 const fs = require('fs');
-const { posix, join, relative, parse } = require('path');
+const { posix, join, relative, parse, sep } = require('path');
 const { src, dest, watch } = require('gulp');
 const gulpif = require('gulp-if');
 const sass = require('gulp-sass');
@@ -11,16 +11,18 @@ const sprites = require('postcss-sprites');
 const stylelint = require('stylelint');
 const autoprefixer = require('autoprefixer');
 const through = require('through');
-const { hasPath } = require('../util');
+const { hasPath, transformToGlobPath } = require('../util');
 const isProduction = process.env.NODE_ENV === 'production';
 const PATH = require('./config');
 const option = { removeBOM: false, allowEmpty: true };
-const sourceMapPath = '../source-map/css';
-
+const sourceMapPath = join('..', 'source-map', 'css');
+const watchFiles = [
+  transformToGlobPath(join(PATH.dev, 'sass'))
+];
 const spriteGroups = [];
 const spriteSettings = {
-  stylesheetPath: PATH.dev + '/sass/**/*.scss',
-  spritePath: PATH.dev + '/images',
+  stylesheetPath: transformToGlobPath(join(PATH.dev, 'sass', '**', '*.scss')),
+  spritePath: join(PATH.dev, 'images'),
   groupBy: (image) => {
     const spriteGroup = image.url.split('_')[1].toString().slice(0, -4);
     if (image.url.indexOf(spriteGroup) >= 0) {
@@ -33,13 +35,13 @@ const spriteSettings = {
   filterBy: (image) => {
     if (!/sprite/.test(image.url)) {
       return Promise.reject();
-    }
+    };
     return Promise.resolve();
   },
   hooks: {
     onSaveSpritesheet: (opts, spritesheet) => {
       spriteGroups.push(
-        posix.join(opts.spritePath, spritesheet.groups[0] + '.' + spritesheet.extension)
+        join(opts.spritePath, spritesheet.groups[0] + '.' + spritesheet.extension)
       )
       const fileName = spritesheet.groups.concat(spritesheet.extension).join('.');
       return join(opts.spritePath, fileName);
@@ -79,15 +81,13 @@ const spriteSettings = {
     }
   },
   verbose: true,
-}
-const sassFiles = [PATH.dev + '/sass/style-edit.scss'];
+};
+const sassFiles = [join(PATH.dev, 'sass', 'style-edit.scss')];
 const processors = [
   autoprefixer(),
   sprites(spriteSettings),
-];
-
-sass.compiler = require('node-sass');
-
+]; 
+sass.compiler = require('node-sass'); 
 const stream = {
   rename: () => rename(path => {
     path.basename = 'style';
@@ -109,7 +109,7 @@ const stream = {
   lint: () => through(async function write(chunk) {
     this.pause();
     const data = await stylelint.lint({
-      files: PATH.dev + '/sass/**/*.scss',
+      files: transformToGlobPath(join(PATH.dev, 'sass', '**', '*.scss')),
       formatter: "verbose"
     })
     if (data.errored === true) {
@@ -121,8 +121,7 @@ const stream = {
       .resume()
       .emit('data', chunk);
   }),
-}
-
+};
 function cssCompiler() {
   return src(sassFiles, Object.assign({}, option))
     .pipe(stream.lint())
@@ -134,12 +133,11 @@ function cssCompiler() {
     .pipe(gulpif(isProduction, cssnano({preset: ['advanced']})))
     .pipe(sourcemaps.write(sourceMapPath))
     .pipe(dest(PATH.cssSource));
-}
-
+};
 function watchCss() {
   console.log('[watch css] sass files listening...')
-  watch(PATH.dev + '/sass', cssCompiler);
-}
+  watch(watchFiles, cssCompiler);
+};
 
 module.exports = {
   cssCompiler, 
