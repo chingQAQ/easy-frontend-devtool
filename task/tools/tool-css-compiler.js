@@ -3,7 +3,7 @@ const { posix, join, relative, parse, sep } = require('path');
 const { src, dest, watch } = require('gulp');
 const gulpif = require('gulp-if');
 const sass = require('gulp-sass');
-const gulpPostcss = require('gulp-postcss');
+const postcss = require('gulp-postcss');
 const rename = require('gulp-rename');
 const cssnano = require('gulp-cssnano');
 const sourcemaps = require('gulp-sourcemaps');
@@ -134,7 +134,7 @@ function cssCompiler() {
     .pipe(stream.rename())
     .pipe(sourcemaps.init())
     .pipe(sass({outputStyle: 'expanded'}).on('error', sass.logError))
-    .pipe(gulpPostcss(processors))
+    .pipe(postcss(processors))
     .pipe(stream.writeImagePath())
     .pipe(gulpif(isProduction, cssnano({preset: ['advanced']})))
     .pipe(sourcemaps.write(sourceMapPath))
