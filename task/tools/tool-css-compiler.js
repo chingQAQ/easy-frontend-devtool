@@ -3,11 +3,12 @@ const { posix, join, relative, parse, sep } = require('path');
 const { src, dest, watch } = require('gulp');
 const gulpif = require('gulp-if');
 const sass = require('gulp-sass');
-const postcss = require('gulp-postcss');
+const gulpPostcss = require('gulp-postcss');
 const rename = require('gulp-rename');
 const cssnano = require('gulp-cssnano');
 const sourcemaps = require('gulp-sourcemaps');
 const sprites = require('postcss-sprites');
+const combineMediaQuery = require('postcss-combine-media-query');
 const stylelint = require('stylelint');
 const autoprefixer = require('autoprefixer');
 const through = require('through');
@@ -48,7 +49,7 @@ const spriteSettings = {
     },
     onUpdateRule: function (rule, token, image) {
       const imageBase = parse(image.spriteUrl).base
-      const imageUrl = join(relative(PATH.cssSource, PATH.imageSource), imageBase);
+      const imageUrl = join(relative(PATH.cssSource, PATH.imageSource), imageBase).split(sep).join('/');
       const checkNaN = number => isNaN(number) ? 0 : number;
       const backgroundSize = {
         width: checkNaN((image.spriteWidth / image.coords.width) * 100),
@@ -82,12 +83,16 @@ const spriteSettings = {
   },
   verbose: true,
 };
+
 const sassFiles = [join(PATH.dev, 'sass', 'style-edit.scss')];
 const processors = [
   autoprefixer(),
   sprites(spriteSettings),
-]; 
+  combineMediaQuery(),
+];
+
 sass.compiler = require('node-sass'); 
+
 const stream = {
   rename: () => rename(path => {
     path.basename = 'style';
@@ -122,18 +127,20 @@ const stream = {
       .emit('data', chunk);
   }),
 };
+
 function cssCompiler() {
   return src(sassFiles, Object.assign({}, option))
     .pipe(stream.lint())
     .pipe(stream.rename())
     .pipe(sourcemaps.init())
     .pipe(sass({outputStyle: 'expanded'}).on('error', sass.logError))
-    .pipe(postcss(processors))
+    .pipe(gulpPostcss(processors))
     .pipe(stream.writeImagePath())
     .pipe(gulpif(isProduction, cssnano({preset: ['advanced']})))
     .pipe(sourcemaps.write(sourceMapPath))
     .pipe(dest(PATH.cssSource));
 };
+
 function watchCss() {
   console.log('[watch css] sass files listening...')
   watch(watchFiles, cssCompiler);

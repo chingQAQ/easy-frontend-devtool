@@ -5,7 +5,6 @@ const imagemin = require('imagemin');
 const imageminJpegRecompress = require('imagemin-jpeg-recompress');
 const imageminPngquant = require('imagemin-pngquant');
 const { transformToGlobPath } = require('../util');
-
 const destination = PATH.imageSource;
 const watchFiles = [
   transformToGlobPath(join(PATH.dev, 'images', '*.{jpg,png}'))
