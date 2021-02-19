@@ -1,3 +1,4 @@
+const { join } = require('path');
 const { src, dest, watch } = require('gulp');
 const sourcemaps = require('gulp-sourcemaps');
 const cached = require('gulp-cached');
@@ -5,9 +6,12 @@ const babel = require('gulp-babel');
 const gulpif = require('gulp-if');
 const rename = require('gulp-rename');
 const minify = require("gulp-babel-minify");
+const { transformToGlobPath } = require('../util');
 const isProduction = process.env.NODE_ENV === 'production';
 const PATH = require('./config');
-const exportsFile = [PATH.dev + '/js/**/*.js'];
+const watchFiles = [
+  transformToGlobPath(join(PATH.dev, 'js', '**', '*.js'))
+];
 const option = { base: PATH.dev, removeBOM: false, allowEmpty: true };
 const minifyOption = {
   removeConsole: true,
@@ -25,7 +29,7 @@ const stream = {
 }
 
 function minJs() {
-  return src(exportsFile, Object.assign({}, option))
+  return src(watchFiles, Object.assign({}, option))
     .pipe(cached('js'))
     .pipe(stream.rename())
     .pipe(sourcemaps.init())
@@ -37,7 +41,7 @@ function minJs() {
 
 function watchJs() {
   console.log('[watch Js] Js files listening...')
-  watch(exportsFile, minJs);
+  watch(watchFiles, minJs);
 }
 
 module.exports = {
