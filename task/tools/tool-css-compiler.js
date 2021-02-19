@@ -85,7 +85,7 @@ const spriteSettings = {
 };
 
 const sassFiles = [join(PATH.dev, 'sass', 'style-edit.scss')];
-const processors = [
+const plugins = [
   autoprefixer(),
   sprites(spriteSettings),
   combineMediaQuery(),
@@ -134,7 +134,7 @@ function cssCompiler() {
     .pipe(stream.rename())
     .pipe(sourcemaps.init())
     .pipe(sass({outputStyle: 'expanded'}).on('error', sass.logError))
-    .pipe(postcss(processors))
+    .pipe(postcss(plugins))
     .pipe(stream.writeImagePath())
     .pipe(gulpif(isProduction, cssnano({preset: ['advanced']})))
     .pipe(sourcemaps.write(sourceMapPath))
