@@ -77,13 +77,28 @@ const rl = readline.createInterface({
   output: process.stdout
 });
 
-rl.question('請輸入開發路徑 ex: ./src\r\n', answer => {
-  config.dev = validPath(answer);
-  rl.question('請輸入輸出路徑 ex: ./dist\r\n', answer => {
-    config.source = validPath(answer);
-    rl.close();
+const question = {
+  devPath: () => new Promise(resolve => {
+    rl.question('請輸入開發路徑 ex: ./src\r\n', answer => {
+      config.dev = validPath(answer);
+      resolve(answer);
+    })
+  }),
+  sourcePath: () => new Promise(resolve => {
+    rl.question('請輸入輸出路徑 ex: ./dist\r\n', answer => {
+      config.source = validPath(answer);
+      resolve(answer);
+    })
   })
-})
+}
+
+async function startInit() {
+  await question.devPath();
+  await question.sourcePath();
+  rl.close();
+}
+
+startInit();
 
 rl.on('close', async() => {
   await create.config();
